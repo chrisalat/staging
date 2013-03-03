@@ -166,7 +166,7 @@ class setup-php {
     source => '/vagrant/private/conf/php/php-fpm/www.conf',
     notify => Class['php::fpm::service'],
   }
-    
+  
 }
 
 class setup-nginx {
