@@ -1,0 +1,44 @@
+server {
+	
+	listen 80;
+	server_name staging.local;
+	
+	access_log /var/log/nginx/staging.access.default.log;
+	error_log /var/log/nginx/staging.error.default.log;
+	
+	root /vagrant/public;
+	index index.php index.html;
+	
+	if (!-e $request_filename) {
+		rewrite ^.*$ /index.php last;
+	}
+	
+	location ~ \.php$ {
+		include fastcgi_params;
+		fastcgi_pass backend;
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME /vagrant/public/$fastcgi_script_name;
+		fastcgi_param APPLICATION_ENV production;
+	}
+	
+	# set expire headers
+	location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+		expires 30d;
+		log_not_found off;
+	}
+	
+	# drop non-rail requests
+	location ~ \.(aspx|jsp|cgi)$ {
+		return 410;
+	}
+	
+	# deny open filetypes
+	location ~ (\.inc\.php|\.tpl|\.sql|\.tpl\.php|\.db|\.htaccess|\.htpasswd)$ {
+		deny all;
+	}
+	
+}
+
+upstream backend {
+	server 127.0.0.1:9000;
+}
